@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sarfaraj | Welcome to San Andreas</title>
+<!-- LOGO: save your logo as logo.png next to index.html (square, 256x256 or bigger works best) -->
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;700&family=UnifrakturCook:wght@700&family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+/* BECKETT REGULAR (hero name): put Beckett-Regular.woff2 / .ttf / .otf next to index.html. Until then Pirata One is the stand-in. */
+@font-face{font-family:"Beckett";src:local("Beckett Regular"),local("Beckett-Regular"),local("Beckett"),url("Beckett-Regular.woff2") format("woff2"),url("Beckett.woff2") format("woff2"),url("Beckett-Regular.ttf") format("truetype"),url("Beckett-Regular.otf") format("opentype"),url("Beckett.ttf") format("truetype");font-display:swap}
+/* DIPLOMA REGULAR (your name + headings): put Diploma-Regular.woff2 / .ttf / .otf next to index.html. Until then UnifrakturCook is the stand-in. */
+@font-face{font-family:"Diploma";font-weight:400;src:local("Diploma Regular"),local("Diploma-Regular"),local("Diploma"),url("Diploma-Regular.woff2") format("woff2"),url("Diploma.woff2") format("woff2"),url("Diploma-Regular.ttf") format("truetype"),url("Diploma-Regular.otf") format("opentype"),url("Diploma.ttf") format("truetype");font-display:swap}
+:root{
+  --ink:#000; --paper:#fff; --ash:#c9c9c9;
+  --ol:-.04em -.04em 0 #000,.04em -.04em 0 #000,-.04em .04em 0 #000,.04em .04em 0 #000,.02em .09em 0 #000,.07em .1em 0 #000;
+  --old:-.022em -.022em 0 #000,.022em -.022em 0 #000,-.022em .022em 0 #000,.022em .022em 0 #000,.05em .06em 0 #000;
+  --ts:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 6px rgba(0,0,0,.8);
+  --beckett:"Beckett","Beckett Regular","Pirata One","UnifrakturCook",serif;
+  --display:"Diploma","Diploma Regular","UnifrakturCook","Old English Text MT",serif;
+  --cond:"Anton","Impact","Arial Narrow",sans-serif;
+  --body:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --ui:1;
+  --zoom:1.14; /* crops the black bars baked into the video file: raise to 1.2 if bars remain, set to 1 to turn off */
+  color-scheme:dark;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-behavior:smooth;scroll-padding-top:80px;scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--body);font-size:1.3rem;line-height:1.35;overflow-x:hidden;text-shadow:var(--ts)}
+a{color:inherit}
+:focus-visible{outline:3px solid #fff;outline-offset:3px}
+::selection{background:#fff;color:#000;text-shadow:none}
+
+/* two background video layers */
+.layer{position:fixed;inset:0;z-index:-3}
+#L2{z-index:-2;opacity:0}
+.bgph{position:absolute;inset:0;background:linear-gradient(180deg,#2a1747,#8a2f58 25%,#e8602c 50%,#8a2f58 75%,#14111f);background-size:100% 400%}
+#L2 .bgph{background:linear-gradient(180deg,#0f2b3d,#1f6f78 28%,#f5b335 55%,#c8281e 78%,#2a0f1f);background-size:100% 400%}
+.bgvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(var(--zoom,1.14));background:transparent}
+.layer.has-v .bgph{display:none}
+.scrim{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at center,rgba(0,0,0,.1) 30%,rgba(0,0,0,.65) 100%),rgba(0,0,0,.2)}
+.badge{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;max-width:60vw;padding:8px 12px;background:#000;color:#fff;border:2px solid #fff;font-weight:700;font-size:1rem;text-shadow:none}
+nav,.hud,.badge,.hero,.scrim,.layer{will-change:opacity}
+.prog{position:fixed;left:0;top:0;height:4px;width:100%;background:#fff;transform-origin:left;transform:scaleX(0);z-index:60}
+
+/* HUD */
+.hud{position:fixed;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:40;text-align:right;font-family:var(--cond);pointer-events:none}
+.hud #cash{font-size:1.9rem;letter-spacing:.04em;text-shadow:var(--ol)}
+.hud #stars{font-size:1.5rem;letter-spacing:.12em;color:rgba(255,255,255,.28);text-shadow:var(--ol)}
+.hud #stars .lit{color:#fff}
+
+/* nav (fades out while a video plays, fades back in after) */
+nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:50;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 4vw}
+body.ui-off nav,body.ui-off .badge{pointer-events:none}
+nav.solid{background:rgba(0,0,0,.9);box-shadow:0 1px 0 rgba(255,255,255,.2)}
+.logo{justify-self:start;display:grid;place-items:center;width:46px;height:46px;background:#000;border:2px solid #fff;font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1;color:#fff;text-decoration:none;text-shadow:none;transition:background .2s,color .2s}
+.logo:hover{background:#fff;color:#000}
+nav ul{display:flex;gap:clamp(8px,2vw,26px);list-style:none;margin:0;padding:6px;border:2px solid #fff;background:rgba(0,0,0,.55)}
+nav ul a{display:block;padding:6px 18px;text-decoration:none;font-family:var(--cond);font-size:1rem;letter-spacing:.06em;text-transform:uppercase;text-shadow:none;transition:background .2s,color .2s}
+nav ul a:hover{background:#fff;color:#000}
+.btn{justify-self:end;padding:11px 24px;background:#fff;color:#000;border:2px solid #fff;text-decoration:none;font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase;font-size:1rem;text-shadow:none;transition:background .2s,color .2s}
+.btn:hover{background:#000;color:#fff}
+@media (max-width:760px){nav ul{display:none}nav{grid-template-columns:1fr auto}}
+
+/* video stages: tall empty scroll runway, the fixed video plays while you cross it */
+.stage{position:relative}
+#stageA{height:360vh}
+#stageB{height:280vh}
+
+/* hero sits pinned at the start of stage A and fades out as the video starts */
+.hero{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 6vw 160px}
+.hero h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(4.8rem,20vw,16rem);line-height:1.1;letter-spacing:.015em;color:#fff;text-shadow:var(--old)}
+.hero p{max-width:50ch;margin:40px 0 0;font-size:clamp(1.2rem,2.2vw,1.55rem);font-weight:700}
+.cue{width:2px;height:48px;margin-top:34px;background:#fff;box-shadow:0 0 0 1px #000;transform-origin:top;animation:drip 1.8s ease-in infinite}
+@keyframes drip{0%{transform:scaleY(0);opacity:1}60%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
+.cities{position:absolute;left:0;right:0;bottom:calc(34px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:clamp(14px,4vw,50px);font-family:var(--cond);font-size:clamp(.95rem,2.2vw,1.4rem);letter-spacing:.1em;text-transform:uppercase}
+.cities span+span{padding-left:clamp(14px,4vw,50px);border-left:2px solid #fff}
+
+/* big slanted shout */
+.shout{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;background:rgba(0,0,0,.55)}
+.big{display:block;width:max-content;white-space:nowrap;font-family:var(--cond);text-transform:uppercase;font-size:clamp(9rem,36vw,30rem);line-height:.9;color:#fff;text-shadow:var(--ol);transform:translate(var(--sx,0),0) rotate(-5deg);will-change:transform}
+.round{--d:clamp(120px,16vw,190px);position:absolute;left:50%;top:50%;z-index:3;width:var(--d);aspect-ratio:1;margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);display:grid;place-items:center;text-align:center;background:#fff;color:#000;border-radius:50%;border:4px solid #000;box-shadow:0 0 0 3px #fff;text-decoration:none;font-family:var(--cond);text-transform:uppercase;font-size:clamp(1.1rem,2.2vw,1.6rem);line-height:1.1;text-shadow:none;transition:transform .2s,background .2s,color .2s}
+.round:hover{transform:scale(1.1) rotate(-6deg);background:#000;color:#fff;border-color:#fff}
+
+/* panels */
+.panel{background:rgba(0,0,0,.84);box-shadow:0 -1px 0 rgba(255,255,255,.25)}
+.title{margin:0;font-family:var(--cond);font-weight:400;text-transform:uppercase;font-size:clamp(3rem,10vw,6.5rem);line-height:1;text-align:center;text-shadow:var(--ol)}
+.sub{max-width:56ch;margin:18px auto 0;text-align:center;color:var(--ash)}
+.story{padding:16vh 6vw 14vh}
+.frames{display:flex;justify-content:center;align-items:flex-start;gap:clamp(10px,3vw,44px);margin:9vh auto 12vh;max-width:980px}
+.frame{flex:1;max-width:400px;aspect-ratio:3/4;padding:8px;background:#fff;clip-path:polygon(8% 0,100% 5%,92% 100%,0 95%);opacity:0;transform:translateY(90px)}
+.frame.b{clip-path:polygon(0 5%,92% 0,100% 95%,8% 100%);margin-top:12vh}
+.frame>div{width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:14px;background:linear-gradient(160deg,#1c1c1c,#8a8a8a);clip-path:inherit;font-family:var(--cond);text-transform:uppercase;font-size:clamp(1rem,3vw,1.8rem);overflow:hidden;filter:grayscale(1);transition:filter .4s}
+.frame:hover>div{filter:none}
+.frame img{width:100%;height:100%;object-fit:cover}
+.frame.on{opacity:1;transform:none;transition:transform .9s cubic-bezier(.2,.9,.3,1),opacity .6s}
+.lines{max-width:900px;margin:0 auto}
+.ln{font-size:clamp(1.8rem,4.6vw,3rem);font-weight:700;line-height:1.2;margin:0 0 7vh;color:rgba(255,255,255,.2);text-shadow:none;transition:color .5s}
+.ln.on{color:#fff;text-shadow:var(--ts)}
+.ln em{font-style:normal;background:#fff;color:#000;padding:0 .22em;text-shadow:none}
+
+/* contacts */
+.contacts{padding:14vh 6vw 12vh}
+.wrap{max-width:960px;margin:0 auto}
+.phone{list-style:none;margin:7vh 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.phone li{opacity:0;transform:translateY(50px);transition:transform .6s cubic-bezier(.2,.9,.3,1.1),opacity .5s}
+.phone li.in{opacity:1;transform:none}
+.contact{display:flex;flex-direction:column;gap:2px;height:100%;padding:20px 22px;background:#000;border:2px solid #fff;text-decoration:none;transition:background .2s,color .2s,transform .2s}
+.contact b{font-family:var(--cond);font-weight:400;font-size:2rem;letter-spacing:.03em;text-transform:uppercase}
+.contact span{color:var(--ash)}
+.contact:hover{background:#fff;color:#000;text-shadow:none;transform:translate(-4px,-4px);box-shadow:6px 6px 0 #000,6px 6px 0 2px #fff}
+.contact:hover span{color:#333}
+.safehouse{display:block;margin-top:8vh;padding:36px 30px;background:#fff;color:#000;border:4px solid #000;box-shadow:0 0 0 3px #fff,12px 12px 0 3px #fff;text-decoration:none;text-shadow:none;transition:transform .2s,background .2s,color .2s}
+.safehouse small{display:block;font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-size:1.05rem}
+.safehouse div{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,9vw,5.2rem);line-height:1;margin-top:8px}
+.safehouse:hover{background:#000;color:#fff;border-color:#fff;transform:translate(-4px,-4px)}
+
+/* end */
+.end{min-height:80svh;display:grid;place-items:center;text-align:center;padding:10vh 6vw;background:linear-gradient(rgba(0,0,0,.8),#000)}
+.end h2{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(3.2rem,13vw,9rem);line-height:1;color:#fff;text-shadow:var(--old);transform:scale(.6);opacity:0;transition:transform .7s cubic-bezier(.2,1.4,.4,1),opacity .5s}
+.end.on h2{transform:none;opacity:1}
+.end p{font-family:var(--cond);font-size:1.9rem;letter-spacing:.08em;margin:16px 0 6px}
+.end small{color:var(--ash)}
+
+/* GTA SA style loading screen */
+body.loading{overflow:hidden}
+#loader{position:fixed;inset:0;z-index:100;background:#000;color:#fff;overflow:hidden;transition:opacity .8s,visibility .8s}
+#loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.ls{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(160deg,#161616,#6c6c6c);opacity:0;transition:opacity 1s}
+.ls.on{opacity:1}
+.ls i{font-style:normal;font-family:var(--cond);font-size:clamp(1.4rem,4vw,3rem);letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.ls img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ls.on img{animation:kb 6s ease-out forwards}
+@keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+.logo img{width:72%;height:72%;object-fit:contain;display:block}
+.lname img{height:.85em;width:auto}
+.lshade{position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.85)),radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.55))}
+.lname{display:flex;align-items:center;gap:.25em;position:absolute;top:calc(4vh + env(safe-area-inset-top,0px));left:6vw;font-family:var(--display);font-weight:400;font-size:clamp(2.4rem,6vw,4.4rem);line-height:1;text-shadow:var(--old)}
+.lbar{position:absolute;left:6vw;right:6vw;bottom:calc(7vh + env(safe-area-inset-bottom,0px))}
+.lbar .txt{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:10px;font-family:var(--cond);font-size:clamp(1.2rem,2.4vw,1.8rem);letter-spacing:.08em;text-transform:uppercase;text-shadow:var(--ol)}
+.track{height:14px;background:rgba(0,0,0,.7);border:2px solid #000;box-shadow:0 0 0 2px #fff}
+.fill{height:100%;width:0;background:#fff}
+@media (prefers-reduced-motion:reduce){.ls.on img{animation:none}}
+@media (max-width:560px){.hud #cash{font-size:1.4rem}.hud #stars{font-size:1.1rem}.badge{display:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}.cue{animation:none}
+  .frame,.phone li,.end h2{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body class="loading">
+<noscript><style>#loader{display:none}body.loading{overflow:auto}</style></noscript>
+<div id="loader" aria-label="Loading">
+  <!-- LOADING SCREEN PICTURES: put photo3.jpg and photo4.jpg next to index.html.
+       Want more? Copy one of the two <div class="ls"> lines below and change the file name (photo5.jpg, ...). -->
+  <div class="ls on"><i>photo3.jpg</i><img src="photo3.jpg" alt="" onerror="this.remove()"></div>
+  <div class="ls"><i>photo4.jpg</i><img src="photo4.jpg" alt="" onerror="this.remove()"></div>
+  <div class="lshade"></div>
+  <div class="lname"><img src="logo.png" alt="" hidden onload="this.hidden=false" onerror="this.remove()">Sarfaraj</div>
+  <div class="lbar">
+    <div class="txt"><span id="ltxt">Loading</span><span>Web.exe loading</span></div>
+    <div class="track"><div class="fill" id="lfill"></div></div>
+  </div>
+</div>
+<div class="prog" id="prog"></div>
+
+<!-- VIDEO 1 (plays while you scroll through the hero runway): add src="video1.mp4" to the video tag -->
+<div class="layer" id="L1"><div class="bgph"></div><video class="bgvid" id="v1" src="video1.mp4" muted playsinline preload="auto" aria-hidden="true"></video></div>
+<!-- VIDEO 2 (plays while you scroll through the second runway before Contacts): add src="video2.mp4" -->
+<div class="layer" id="L2"><div class="bgph"></div><video class="bgvid" id="v2" src="video2.mp4" muted playsinline preload="auto" aria-hidden="true"></video></div>
+<div class="scrim" id="scrim"></div>
+<div class="badge" id="vidbadge">Video placeholders. Add src to the video tags.</div>
+
+<div class="hud" aria-hidden="true">
+  <div id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+  <div id="cash">$00000000</div>
+</div>
+
+<nav id="nav">
+  <a class="logo" href="#top" aria-label="Top"><span>S</span><img src="logo.png" alt="" hidden onload="this.hidden=false;this.previousElementSibling.hidden=true" onerror="this.remove()"></a>
+  <ul>
+    <li><a href="#story">Story</a></li>
+    <li><a href="#contacts">Contacts</a></li>
+    <li><a href="#safehouse">Safehouse</a></li>
+  </ul>
+  <a class="btn" href="#contacts">Get in touch</a>
+</nav>
+
+<section class="stage" id="stageA">
+  <header class="hero" id="top">
+    <h1>Sarfaraj</h1>
+    <!-- EDIT: one-line intro under your name -->
+    <p>Welcome to my corner of San Andreas. Scroll down and I’ll show you around.</p>
+    <div class="cue" aria-hidden="true"></div>
+    <div class="cities"><span>Los Santos</span><span>San Fierro</span><span>Las Venturas</span></div>
+  </header>
+</section>
+
+<section class="shout" id="shout">
+  <span class="big" id="big">Welcome to my hood</span>
+  <a class="round" href="#contacts">Say hi</a>
+</section>
+
+<section class="story panel" id="story">
+  <h2 class="title">The story</h2>
+  <p class="sub">Who’s this guy? Here’s the short version.</p>
+  <div class="frames">
+    <!-- EDIT: replace each placeholder div content with <img src="photo.jpg" alt="..."> -->
+    <div class="frame"><div><img src="photo1.jpg" alt="Sarfaraj"></div></div>
+    <div class="frame b"><div><img src="photo2.jpg" alt="Sarfaraj"></div></div>
+  </div>
+  <div class="lines">
+    <!-- EDIT THESE LINES with your own intro -->
+    <p class="ln">I’m <em>Sarfaraj</em>.</p>
+    <p class="ln">I live in <em>Kolkata</em> and I spend my time <em>Working on new things</em>.</p>
+    <p class="ln">I’m into <em>Gaming</em>, and I’m always building something new.</p>
+    <p class="ln">This is my personal base. Take a look around.</p>
+  </div>
+</section>
+
+<section class="stage" id="stageB" aria-hidden="true"></section>
+
+<section class="contacts panel" id="contacts">
+  <div class="wrap">
+    <h2 class="title">Contacts</h2>
+    <!-- EDIT: replace each href="#" with your real link and the handle text -->
+    <ul class="phone" id="phone">
+      <li><a class="contact" href="https://instagram.com/sarfarxj" target="_blank" rel="noopener"><b>Instagram</b><span>@sarfarxj</span></a></li>
+      <li><a class="contact" href="https://github.com/sampowered" target="_blank" rel="noopener"><b>GitHub</b><span>@sampowered</span></a></li>
+      <li><a class="contact" href="https://youtube.com/@sarfarxj" target="_blank" rel="noopener"><b>YouTube</b><span>@sarfarxj</span></a></li>
+      <li><a class="contact" href="https://x.com/sarfarxj" target="_blank" rel="noopener"><b>X</b><span>@sarfarxj</span></a></li>
+      <li><a class="contact" href="#" id="discord" title="Click to copy"><b>Discord</b><span>sarfarxj</span></a></li>
+    </ul>
+    <!-- EDIT: put your other website’s link in href -->
+    <a class="safehouse" id="safehouse" href="https://sampowered.indevs.in/" target="_blank" rel="noopener">
+      <small>My other website</small>
+      <div>Visit the safehouse</div>
+    </a>
+  </div>
+</section>
+
+<footer class="end" id="end">
+  <div>
+    <h2>Mission passed</h2>
+    <p>Respect +</p>
+    <small>sarfaraj.us.mw</small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var root=document.documentElement,prog=$('prog'),nav=$('nav'),badge=$('vidbadge'),shout=$('shout'),big=$('big'),
+      cash=$('cash'),stars=$('stars').children,hero=$('top'),scrim=$('scrim'),sA=$('stageA'),sB=$('stageB'),L2=$('L2');
+  function clamp(n){return Math.max(0,Math.min(1,n))}
+
+  /* two scroll-scrubbed videos */
+  var V=[1,2].map(function(n){
+    var L=$('L'+n),el=$('v'+n),has=!!(el.getAttribute('src')||el.querySelector('source'));
+    var o={L:L,el:el,has:has,ph:L.querySelector('.bgph'),dur:0,target:0,cur:0};
+    if(has){
+      L.classList.add('has-v');
+      var rd=function(){o.dur=el.duration;el.pause()};
+      el.addEventListener('loadedmetadata',rd);
+      if(el.readyState>=1)rd();
+    }
+    return o;
+  });
+  var missing=V.map(function(o,i){return o.has?'':String(i+1)}).filter(Boolean);
+  if(missing.length)badge.textContent='Video '+missing.join(' and ')+' placeholder. Add src to the video tag.';
+  else badge.style.display='none';
+
+  V.forEach(function(o){o.last=-1});
+  (function loop(){
+    V.forEach(function(o){
+      if(!o.dur)return;
+      o.cur+=(o.target-o.cur)*0.2;
+      var t=Math.min(o.dur-0.05,Math.max(0,o.cur));
+      /* only one seek at a time: queued seeks are what makes scrubbing lag */
+      if(!o.el.seeking&&Math.abs(t-o.last)>0.03){o.el.currentTime=t;o.last=t}
+    });
+    requestAnimationFrame(loop);
+  })();
+
+  /* progress through a stage runway: 0 when it fills the screen, 1 when it is about to leave */
+  function stageP(el){var r=el.getBoundingClientRect();return clamp(-r.top/(r.height-innerHeight))}
+  /* UI hides at the start of a video and fades back in at the end */
+  function uiVis(p){return p<0.5?1-clamp(p/0.1):clamp((p-0.9)/0.1)}
+
+  var hud=document.querySelector('.hud'),lastLit=-1,lastCash='',solid=false,uiOff=false;
+  function update(){
+    /* read layout first, then write, so the browser lays out only once per frame */
+    var ih=innerHeight,iw=innerWidth,sy=scrollY,max=root.scrollHeight-ih;
+    var ra=sA.getBoundingClientRect(),rb=sB.getBoundingClientRect(),rs=shout.getBoundingClientRect(),bw=big.offsetWidth;
+    var p=max>0?clamp(sy/max):0,pA=clamp(-ra.top/(ra.height-ih)),pB=clamp(-rb.top/(rb.height-ih)),
+        sp=clamp((ih-rs.top)/(ih+rs.height)),ui=Math.min(uiVis(pA),uiVis(pB));
+
+    prog.style.transform='scaleX('+p+')';
+    var s2=sy>40;if(s2!==solid){solid=s2;nav.classList.toggle('solid',s2)}
+    var c='$'+String(Math.round(p*13370000)).padStart(8,'0');if(c!==lastCash){lastCash=c;cash.textContent=c}
+    var lit=Math.round(p*6);if(lit!==lastLit){lastLit=lit;for(var i=0;i<stars.length;i++)stars[i].className=i<lit?'lit':''}
+
+    V[0].target=V[0].dur*pA;V[1].target=V[1].dur*pB;
+    if(!V[0].has)V[0].ph.style.backgroundPosition='50% '+(pA*100)+'%';
+    if(!V[1].has)V[1].ph.style.backgroundPosition='50% '+(pB*100)+'%';
+    var o2=clamp((ih-rb.top)/ih);L2.style.opacity=o2;L2.style.visibility=o2>0?'visible':'hidden';
+
+    var uo=ui.toFixed(3);nav.style.opacity=uo;hud.style.opacity=uo;badge.style.opacity=uo;
+    var off=ui<0.05;if(off!==uiOff){uiOff=off;document.body.classList.toggle('ui-off',off)}
+    var ho=1-clamp(pA/0.1);hero.style.opacity=ho;hero.style.visibility=ho>0?'visible':'hidden';
+    scrim.style.opacity=0.45+0.55*ui;
+    big.style.transform='translate3d('+(iw*0.12-(bw-iw*0.65)*sp)+'px,0,0) rotate(-5deg)';
+  }
+  var tick=false;
+  addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(function(){update();tick=false})}},{passive:true});
+  addEventListener('resize',update);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(update);
+  update();
+
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}});
+  },{rootMargin:'0px 0px -25% 0px'});
+  document.querySelectorAll('.ln,.frame').forEach(function(el){io.observe(el)});
+  io.observe($('end'));
+
+  var io2=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){
+      var items=[].slice.call($('phone').children),i=items.indexOf(e.target);
+      setTimeout(function(){e.target.classList.add('in')},i*90);io2.unobserve(e.target)}});
+  },{rootMargin:'0px 0px -10% 0px'});
+  [].forEach.call($('phone').children,function(li){io2.observe(li)});
+})();
+(function(){
+    var d=document.getElementById('discord');if(!d)return;
+    d.addEventListener('click',function(e){
+      e.preventDefault();var sp=d.querySelector('span');
+      if(navigator.clipboard)navigator.clipboard.writeText('sarfarxj').catch(function(){});
+      sp.textContent='Copied sarfarxj';setTimeout(function(){sp.textContent='sarfarxj'},1600);
+    });
+  })();
+(function(){
+  var L=document.getElementById('loader'),fill=document.getElementById('lfill'),txt=document.getElementById('ltxt');
+  var slides=[].slice.call(L.querySelectorAll('.ls')),si=0,t0=Date.now(),MIN=4000,MAX=9000,ready=false,done=false,shown=0;
+  var iv=setInterval(function(){
+    if(slides.length<2)return;
+    slides[si].classList.remove('on');si=(si+1)%slides.length;slides[si].classList.add('on');
+  },2000);
+  var v1=document.getElementById('v1');
+  var waits=[new Promise(function(r){if(document.readyState==='complete')r();else addEventListener('load',r)})];
+  if(document.fonts&&document.fonts.ready)waits.push(document.fonts.ready);
+  if(v1.getAttribute('src')&&v1.readyState<2)waits.push(new Promise(function(r){v1.addEventListener('loadeddata',r);v1.addEventListener('error',r)}));
+  Promise.all(waits).then(function(){ready=true});
+  function finish(){
+    if(done)return;done=true;clearInterval(iv);fill.style.width='100%';
+    L.classList.add('done');document.body.classList.remove('loading');
+    setTimeout(function(){L.style.display='none'},1000);
+  }
+  function frame(){
+    var el=Date.now()-t0,full=(ready&&el>=MIN)||el>=MAX;
+    shown+=((full?100:Math.min(92,el/MIN*92))-shown)*0.08;
+    fill.style.width=shown+'%';
+    txt.textContent='Loading'+'...'.slice(0,Math.floor(el/400)%4);
+    if(full&&shown>99.3){finish();return}
+    requestAnimationFrame(frame);
+  }
+  frame();
+  setTimeout(finish,MAX+3000);
+})();
+</script>
+</body>
+</html>
